@@ -8,7 +8,7 @@ resource_name: elasticsearch
 aws: 
   ec2:
     instance_size_series: t2
-    key_name: eherbert
+    key_name: CMF
     base: ami-9887c6e7
     vpc_id: subnet-c601aee9
     masters:
