@@ -1,0 +1,12 @@
+---
+
+- name: Create /etc/elasticsearch
+  file:
+    path: /etc/elasticsearch
+    state: directory
+  
+- name: Create /usr/share/elasticsearch
+  file:
+    path: /usr/share/elasticsearch
+    state: directory
+    

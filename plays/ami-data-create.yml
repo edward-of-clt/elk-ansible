@@ -1,0 +1,86 @@
+---
+
+- name: Create AMI and Save it For Later
+  hosts: ami
+  connection: local
+  tasks:
+
+    - name: Create Instance
+      ec2: 
+        region: "{{ aws.region.geo }}"
+        key_name: "{{ aws.ami.key_name }}"
+        instance_type: "{{ aws.ami.instance_type }}"
+        image: "{{ aws.ami.base }}"
+        wait: yes
+        groups: "{{ aws.ami.security_group }}"
+        vpc_subnet_id: "{{ aws.ami.vpc_id }}"
+        instance_tags:
+          Name: "{{ inventory_hostname }}"
+        count_tag:
+          Name: "{{ inventory_hostname }}"
+        exact_count: 1
+        volumes: "{{ aws.ami.volumes }}"
+      register: ami
+
+    - name: Assign IP to Host
+      set_fact:
+        ansible_host: "{{ ami.tagged_instances[0].private_ip }}"
+        instance_id: "{{ ami.tagged_instances[0].id }}"
+
+    - pause: seconds=30
+      when: ami.changed
+    
+- name: Install Resources
+  hosts: ami
+  become: yes
+  roles:
+    - disable_se_linux
+    - install_packages
+    - role: elasticsearch
+      vars:
+        action: create_dirs
+    - role: elasticsearch
+      vars:
+        action: setup_lvm
+    - role: elasticsearch
+      vars:
+        action: configure
+        job: data
+    - role: elasticsearch
+      vars:
+        action: deploy
+  tasks:
+
+    - name: Create EC2 AMI for Data Nodes
+      ec2_ami:
+        region: "{{ aws.region.geo }}"
+        instance_id: "{{ instance_id }}"
+        wait: yes
+        name: "{{ aws.ami.name }}-data-{{ ansible_date_time.epoch }}"
+        tags:
+          Name: "{{ aws.ami.name }}-data-{{ ansible_date_time.epoch }}"
+          Description: Elastic Data ES Template
+          Job: data
+      become: no
+      delegate_to: localhost
+    
+- name: Take Snapshot of Image and then Terminate
+  hosts: ami
+  connection: local
+  tasks:    
+
+    - name: Terminate Instance
+      ec2: 
+        region: "{{ aws.region.geo }}"
+        key_name: "{{ aws.ami.key_name }}"
+        instance_type: t2.medium 
+        image: "{{ aws.ami.base }}"
+        wait: yes
+        groups: "{{ aws.ami.security_group }}"
+        vpc_subnet_id: "{{ aws.ami.vpc_id }}"
+        instance_tags:
+          Name: "{{ inventory_hostname }}"
+        count_tag:
+          Name: "{{ inventory_hostname }}"
+        exact_count: 0
+

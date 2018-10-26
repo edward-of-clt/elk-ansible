@@ -1,0 +1,6 @@
+---
+
+- name: disable it
+  selinux:
+    state: disabled
+  become: yes

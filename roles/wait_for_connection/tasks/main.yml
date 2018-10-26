@@ -1,0 +1,4 @@
+---
+
+- name: is SSH alive
+  wait_for_connection:

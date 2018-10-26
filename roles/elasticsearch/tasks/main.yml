@@ -1,0 +1,4 @@
+---
+
+- import_tasks: "./{{ action }}.yml"
+  when: action is defined

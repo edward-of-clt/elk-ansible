@@ -1,0 +1,20 @@
+---
+
+
+- name: Create SG Groups
+  ec2_group:
+    name: "{{ item.key }}"
+    description: security group created by ansible
+    vpc_id: "{{ item.value.vpc_id }}"
+  register: "sg_groups"
+  with_dict: "{{ aws.security_groups }}"
+
+- name: Add rules to the SG Groups
+  ec2_group:
+    name: "{{ item.key }}"
+    description: security group created by ansible
+    vpc_id: "{{ item.value.vpc_id }}"
+    rules: "{{ item.value.rules.ingress }}"
+    rules_egress: "{{ item.value.rules.egress }}"
+  with_dict: "{{ aws.security_groups }}"
+

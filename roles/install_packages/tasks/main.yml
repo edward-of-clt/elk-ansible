@@ -1,0 +1,4 @@
+---
+
+- yum:
+    name: ['system-storage-manager', 'sg3_utils', 'lvm*', 'java' ]

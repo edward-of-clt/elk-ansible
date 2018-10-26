@@ -1,0 +1,144 @@
+---
+
+ansible_ssh_user: centos
+
+resource_prefix: elk
+resource_name: elasticsearch
+
+aws: 
+  ec2:
+    instance_size_series: t2
+    key_name: eherbert
+    base: ami-9887c6e7
+    vpc_id: subnet-c601aee9
+    masters:
+      instance_type: t2.large
+      security_group: [ "rv-ssh", "{{ resource_prefix }}-{{ resource_name }}-group", "{{resource_prefix}}-{{ resource_name }}-master" ]
+      volumes: 
+        - device_name: /dev/xvdb
+          volume_size: 50
+          volume_type: gp2
+          delete_on_termination: yes
+  region:
+    geo: us-east-1
+  ami:
+    name: "{{ resource_prefix }}-{{ resource_name }}"
+    base: ami-9887c6e7
+    key_name: eherbert
+    instance_type: t2.medium
+    security_group: [ 'rv-ssh', 'egress-all' ]
+    vpc_id: subnet-c601aee9
+    volumes: 
+      - device_name: /dev/xvdb
+        volume_size: 100
+        iops: 1000
+        volume_type: io1
+  vpc:
+    zones: 
+      rv-saas-main-private-0:
+        id: subnet-c601aee9
+        zone: a
+      rv-saas-main-private-1:
+        id: subnet-5f7d1714
+        zone: b
+      rv-saas-main-private-2:
+        id: subnet-9b1dbdc6
+        zone: c
+      rv-saas-main-private-3:
+        id: subnet-bcc6b7d8
+        zone: d
+  security_groups:
+    "{{ resource_prefix }}-{{ resource_name }}-master":
+      vpc_id: vpc-b592efcd
+      rules:
+        ingress:
+          - proto: tcp
+            ports: 
+              - 9200
+            group_name: "{{resource_prefix}}-{{ resource_name }}-elb"
+          - proto: tcp
+            ports: 9200-9400
+            group_name: "{{resource_prefix}}-{{ resource_name }}-group"
+        egress:
+          - proto: tcp
+            ports: 
+              - 0-65535
+            cidr_ip: 0.0.0.0/0
+    "{{ resource_prefix }}-{{ resource_name }}-group":
+      vpc_id: vpc-b592efcd
+      rules:
+        ingress:
+          - proto: tcp
+            ports: 
+              - 9200-9400
+            group_name: "{{resource_prefix}}-{{ resource_name }}-master"
+          - proto: tcp
+            ports: 
+              - 9200-9400
+            group_name: "{{resource_prefix}}-{{ resource_name }}-group"
+        egress:
+          - proto: tcp
+            ports: 
+              - 0-65535
+            cidr_ip: 0.0.0.0/0
+    "{{resource_prefix}}-{{ resource_name }}-elb":
+      vpc_id: vpc-b592efcd
+      rules:
+        ingress:
+          - proto: tcp
+            ports: 
+              - 9200
+            cidr_ip: 10.0.0.0/8
+        egress:
+          - proto: tcp
+            ports:
+              - 9200
+            group_name: "{{resource_prefix}}-{{ resource_name }}-master"
+  auto_scaling_groups:
+    "{{ resource_prefix }}-{{ resource_name }}-masters":
+      size:
+        initial: 3
+        max: 5
+        min: 3
+      term_policy: OldestInstance
+      launch_config: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
+      load_balancers: "{{resource_prefix}}-{{ resource_name }}-master-elb"
+    "{{ resource_prefix }}-{{ resource_name }}-data":
+      size:
+        initial: 15
+        max: 90
+        min: 15
+      term_policy: OldestInstance
+      launch_config: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
+      load_balancers: "{{resource_prefix}}-{{ resource_name }}-data-elb"
+  launch_config:
+    name: "{{resource_prefix}}-{{ resource_name }}"
+  load_balancer: 
+    "{{resource_prefix}}-{{ resource_name }}-master-elb":
+      listeners: # use ansible module docs for params to pass
+        - protocol: tcp
+          load_balancer_port: 9200
+          instance_port: 9200
+      security_groups: "{{resource_prefix}}-{{ resource_name }}-ec2, {{resource_prefix}}-sg-groups, {{resource_prefix}}-{{ resource_name }}-elb"    
+    "{{resource_prefix}}-{{ resource_name }}-data-elb":
+      listeners: # use ansible module docs for params to pass
+        - protocol: tcp
+          load_balancer_port: 9200
+          instance_port: 9200
+      security_groups: "{{resource_prefix}}-{{ resource_name }}-ec2, {{resource_prefix}}-sg-groups, {{resource_prefix}}-{{ resource_name }}-elb"
+
+elastic:
+  discovery:
+    zen:
+      minimum_master_nodes: 3
+  network:
+    host: 0.0.0.0
+  cluster:
+    name: cluster_name
+  index:
+    number_of_replicas: 2
+  
+java_heap:
+  max: 1024m
+  min: 1024m
+

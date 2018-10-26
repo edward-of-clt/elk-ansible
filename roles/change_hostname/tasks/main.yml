@@ -1,0 +1,5 @@
+---
+
+- name: change it
+  hostname:
+    name: "{{ inventory_hostname }}"

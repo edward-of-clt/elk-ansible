@@ -1,0 +1,30 @@
+---
+
+- name: Create a volume group on top of /dev/xvdb1
+  lvg:
+    vg: elastic
+    pvs: /dev/xvdb
+
+- name: Create a logical volume from /dev/xvdb
+  lvol:
+    vg: elastic
+    lv: indexes
+    size: 1000
+    pvs: /dev/xvdb
+
+- name: Create a XFS filesystem on /dev/elastic/indexes and check disk blocks
+  filesystem:
+    fstype: xfs
+    dev: /dev/elastic/indexes
+
+- name: Mount /dev/elastic/indexes to /usr/share/elasticsearch
+  mount:
+    path: /usr/share/elasticsearch
+    src: /dev/elastic/indexes
+    fstype: xfs
+    state: present
+
+- name: Mount from fstab
+  command: mount -a
+  args:
+    warn: no

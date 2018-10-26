@@ -1,0 +1,7 @@
+---
+
+- name: Create the Security Groups Needed for Elastic
+  hosts: ami
+  connection: local
+  roles:
+    - security_groups

@@ -1,0 +1,19 @@
+cluster.name: {{ elastic.cluster.name }}
+network.host: 0.0.0.0
+
+node.master: {% if job is defined and 'master' in job %}true{% else %}false{% endif %}
+
+node.data: {% if job is defined and 'data' in job %}true{% else %}false{% endif %}
+
+node.name: {{ inventory_hostname }}
+
+indices.fielddata.cache.size: 30%
+indices.queries.cache.size: "3gb"
+indices.recovery.max_bytes_per_sec: 100mb
+discovery.zen.minimum_master_nodes: 3
+discovery.zen.ping.unicast.hosts: [ "{{ groups['masters'] | map('extract', hostvars, ['ansible_host']) | join('","') }}" ]
+http.cors.enabled: true
+
+http.cors.allow-origin: '*'
+
+xpack.security.enabled: true

@@ -1,0 +1,16 @@
+--- 
+
+- name: Find Latest AMI
+  hosts: ami
+  connection: local
+  tasks:
+
+    - name: Query AWS
+      ec2_ami_facts:
+        region: "{{ aws.region.geo }}"
+        filters: 
+          name: "{{ aws.ami.name }}-*"
+      register: ami
+
+    - debug:
+        var: ami

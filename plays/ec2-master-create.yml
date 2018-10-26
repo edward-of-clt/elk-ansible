@@ -1,0 +1,51 @@
+---
+
+- name: Create AMI and Save it For Later
+  hosts: masters
+  connection: local
+  tasks:
+
+    - name: Create Instance
+      ec2: 
+        region: "{{ aws.region.geo }}"
+        key_name: "{{ aws.ec2.key_name }}"
+        instance_type: "{{ aws.ec2.masters.instance_type }}"
+        image: "{{ aws.ec2.base }}"
+        wait: yes
+        groups: "{{ aws.ec2.masters.security_group }}"
+        vpc_subnet_id: "{{ aws.ec2.vpc_id }}"
+        instance_tags:
+          Name: "{{ inventory_hostname }}"
+        count_tag:
+          Name: "{{ inventory_hostname }}"
+        exact_count: 1
+        volumes: "{{ aws.ec2.masters.volumes }}"
+      register: master
+
+    - name: Assign IP to Host
+      set_fact:
+        ansible_host: "{{ master.tagged_instances[0].private_ip }}"
+        instance_id: "{{ master.tagged_instances[0].id }}"
+
+    - pause: seconds=30
+    
+- name: Install Resources & Deploy
+  hosts: masters
+  become: yes
+  roles:
+    - change_hostname
+    - disable_se_linux
+    - install_packages
+    - role: elasticsearch
+      vars:
+        action: create_dirs
+    - role: elasticsearch
+      vars:
+        action: setup_lvm
+    - role: elasticsearch
+      vars:
+        action: configure
+        job: master
+    - role: elasticsearch
+      vars:
+        action: deploy

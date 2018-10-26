@@ -1,0 +1,9 @@
+---
+
+- import_playbook: plays/sg-create.yml
+
+- import_playbook: plays/ec2-master-create.yml
+
+- import_playbook: plays/ami-data-create.yml
+
+# - import_playbook: plays/asg-data-create.yml
