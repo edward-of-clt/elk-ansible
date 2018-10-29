@@ -9,17 +9,6 @@
     src: config/
     dest: /etc/elasticsearch
     
-- name: Make sure permissions are right
-  file: 
-    path: "{{ item }}"
-    recurse: yes
-    owner: 997
-    group: 993
-    mode: 0777
-  with_items:
-    - /etc/elasticsearch
-    - /usr/share/elasticsearch
-
 - name: set vm.max_map_count to 262144 in sysctl
   sysctl: name={{ item.key }} value={{ item.value }}
   with_items:
