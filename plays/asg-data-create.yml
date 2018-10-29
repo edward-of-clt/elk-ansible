@@ -34,3 +34,12 @@
         desired_capacity: "{{ item.value.size.initial }}"
         vpc_zone_identifier: "[ {% for item, vals in aws.vpc.zones |dictsort %}'{{ vals.id }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
       with_dict: "{{ aws.auto_scaling_groups }}"
+
+- name: Restart ES Masters 
+  hosts: masters
+  become: yes
+  tasks:
+
+    - service:
+        name: elasticsearch
+        state: restarted
