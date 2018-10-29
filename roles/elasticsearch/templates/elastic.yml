@@ -5,7 +5,7 @@ node.master: {% if job is defined and 'master' in job %}true{% else %}false{% en
 
 node.data: {% if job is defined and 'data' in job %}true{% else %}false{% endif %}
 
-node.name: {{ inventory_hostname }}
+node.name: ${HOSTNAME}
 
 indices.fielddata.cache.size: 30%
 indices.queries.cache.size: "3gb"

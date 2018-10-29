@@ -1,0 +1,36 @@
+---
+
+- name: Stand up data nodes
+  hosts: data
+  connection: local
+  tasks:
+    - name: Query AWS for latest AMI
+      ec2_ami_facts:
+        region: "{{ aws.region.geo }}"
+        filters: 
+          name: "{{ aws.ami.name }}-*"
+      register: ami
+
+    - set_fact:
+        latest_ami: "{{ ami.images | sort(attribute='creation_date') | last }}"
+    
+    - name: Create Launch Config
+      ec2_lc:
+        name: "{{ aws.launch_config.name }}"
+        image_id: "{{ latest_ami.image_id }}"
+        key_name: "{{ aws.ec2.key_name }}"
+        security_groups: "{{ aws.ec2.data.security_group }}"
+        instance_type: "{{ aws.ec2.data.instance_type }}"
+
+    - name: Create ASG
+      ec2_asg:
+        name: "{{ resource_prefix }}-{{ resource_name }}"
+        # load_balancers: [ 'lb1', 'lb2' ]
+        availability_zones: "[ {% for item, vals in aws.vpc.zones| dictsort %}'{{ aws.region.geo }}{{ vals.zone }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
+        launch_config_name: "{{ aws.launch_config.name }}"
+        min_size: "{{ item.value.size.min }}"
+        max_size: "{{ item.value.size.max }}"
+        wait_for_instances: yes
+        desired_capacity: "{{ item.value.size.initial }}"
+        vpc_zone_identifier: "[ {% for item, vals in aws.vpc.zones |dictsort %}'{{ vals.id }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
+      with_dict: "{{ aws.auto_scaling_groups }}"

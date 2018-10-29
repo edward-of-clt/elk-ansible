@@ -19,12 +19,15 @@ aws:
           volume_size: 50
           volume_type: gp2
           delete_on_termination: yes
+    data:
+      instance_type: t2.large
+      security_group: [ "rv-ssh", "{{ resource_prefix }}-{{ resource_name }}-group" ]
   region:
     geo: us-east-1
   ami:
     name: "{{ resource_prefix }}-{{ resource_name }}"
     base: ami-9887c6e7
-    key_name: eherbert
+    key_name: CMF
     instance_type: t2.medium
     security_group: [ 'rv-ssh', 'egress-all' ]
     vpc_id: subnet-c601aee9
@@ -44,9 +47,6 @@ aws:
       rv-saas-main-private-2:
         id: subnet-9b1dbdc6
         zone: c
-      rv-saas-main-private-3:
-        id: subnet-bcc6b7d8
-        zone: d
   security_groups:
     "{{ resource_prefix }}-{{ resource_name }}-master":
       vpc_id: vpc-b592efcd
@@ -95,24 +95,24 @@ aws:
               - 9200
             group_name: "{{resource_prefix}}-{{ resource_name }}-master"
   auto_scaling_groups:
-    "{{ resource_prefix }}-{{ resource_name }}-masters":
-      size:
-        initial: 3
-        max: 5
-        min: 3
-      term_policy: OldestInstance
-      launch_config: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
-      load_balancers: "{{resource_prefix}}-{{ resource_name }}-master-elb"
+    # "{{ resource_prefix }}-{{ resource_name }}-masters":
+    #   size:
+    #     initial: 3
+    #     max: 5
+    #     min: 3
+    #   term_policy: OldestInstance
+    #   launch_config: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
+    #   load_balancers: "{{resource_prefix}}-{{ resource_name }}-master-elb"
     "{{ resource_prefix }}-{{ resource_name }}-data":
       size:
-        initial: 15
+        initial: 6
         max: 90
-        min: 15
+        min: 6
       term_policy: OldestInstance
-      launch_config: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
+      launch_config: "{{ resource_prefix }}-elastic-*"
       load_balancers: "{{resource_prefix}}-{{ resource_name }}-data-elb"
   launch_config:
-    name: "{{resource_prefix}}-{{ resource_name }}"
+    name: "{{ resource_prefix }}-elastic-{{ ansible_date_time.epoch }}"
   load_balancer: 
     "{{resource_prefix}}-{{ resource_name }}-master-elb":
       listeners: # use ansible module docs for params to pass
