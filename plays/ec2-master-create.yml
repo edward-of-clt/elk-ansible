@@ -28,7 +28,8 @@
         instance_id: "{{ master.tagged_instances[0].id }}"
 
     - pause: seconds=30
-    
+      when: master.changed
+
 - name: Install Resources & Deploy
   hosts: masters
   become: yes
