@@ -175,7 +175,8 @@ path.logs: "/usr/share/elasticsearch/logs"
 #
 # You should also make sure that the ElasticSearch process is allowed to lock
 # the memory, eg. by using `ulimit -l unlimited`.
-
+bootstrap.memory_lock: true
+bootstrap.mlockall: true
 
 ############################## Network And HTTP ###############################
 

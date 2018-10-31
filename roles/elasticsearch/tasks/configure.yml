@@ -9,6 +9,15 @@
   with_items:
     - { key: "vm.max_map_count", value: "262144" }
 
+- name: Disable swap
+  command: swapoff -a
+
+- name: Enable memory locking
+  command: ulimit -l unlimited
+
+- name: Ensure sufficient threads
+  command: ulimit -u 4096
+
 - name: Create /usr/share/elasticsearch/logs
   file:
     path: "/usr/share/elasticsearch/{{ item }}"
