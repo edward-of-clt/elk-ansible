@@ -12,11 +12,11 @@
 - name: Disable swap
   command: swapoff -a
 
-- name: Enable memory locking
-  command: ulimit -l unlimited
-
-- name: Ensure sufficient threads
-  command: ulimit -u 4096
+# - name: Enable memory locking
+#   command: ulimit -l unlimited
+# 
+# - name: Ensure sufficient threads
+#   command: ulimit -u 4096
 
 - name: Create /usr/share/elasticsearch/logs
   file:
@@ -43,6 +43,12 @@
     owner: root
     group: root
     mode: 0744
+  register: service
+
+- name: Reload daemon
+  service:
+    daemon_reload: yes
+  when: service.changed
 
 - name: Write log4j2.properties
   copy:

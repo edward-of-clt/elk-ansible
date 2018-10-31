@@ -68,9 +68,9 @@ node.name: ${HOSTNAME}
 #    to act as a "search load balancer" (fetching data from nodes,
 #    aggregating results, etc.)
 #
-node.master: {% if job is defined and 'master' in job %}true{% else %}false{% endif %}
+node.master: ${IS_MASTER}
 
-node.data: {% if job is defined and 'data' in job %}true{% else %}false{% endif %}
+node.data: ${IS_DATA}
 
 # Use the Cluster Health API [http://localhost:9200/_cluster/health], the
 # Node Info API [http://localhost:9200/_cluster/nodes] or GUI tools
@@ -175,8 +175,8 @@ path.logs: "/usr/share/elasticsearch/logs"
 #
 # You should also make sure that the ElasticSearch process is allowed to lock
 # the memory, eg. by using `ulimit -l unlimited`.
-bootstrap.memory_lock: true
-bootstrap.mlockall: true
+
+# bootstrap.memory_lock: true
 
 ############################## Network And HTTP ###############################
 

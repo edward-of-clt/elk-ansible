@@ -1,5 +1,11 @@
 ---
 
+- name: install libselinux-python
+  package:
+    name: libselinux-python
+    state: latest
+  become: yes
+
 - name: disable it
   selinux:
     state: disabled

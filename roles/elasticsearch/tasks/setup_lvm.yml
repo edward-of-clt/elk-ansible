@@ -1,9 +1,15 @@
 ---
 
+- name: Determine mount state
+  shell: mount | grep '/usr/share/elasticsearch'
+  register: mount_state
+  ignore_errors: yes
+
 - name: Create a volume group on top of /dev/xvdb1
   lvg:
     vg: elastic
     pvs: /dev/xvdb
+  when: mount_state.stdout == ""
 
 - name: Create a logical volume from /dev/xvdb
   lvol:
@@ -11,16 +17,19 @@
     lv: indexes
     size: 1000
     pvs: /dev/xvdb
+  when: mount_state.stdout == ""
 
 - name: Create a XFS filesystem on /dev/elastic/indexes and check disk blocks
   filesystem:
     fstype: xfs
     dev: /dev/elastic/indexes
+  when: mount_state.stdout == ""
 
 - name: Copy out the old content
   shell: |
     mkdir /tmp/usr_share_elasticsearch
     mv /usr/share/elasticsearch/* /tmp/usr_share_elasticsearch/
+  when: mount_state.stdout == ""
 
 - name: Mount /dev/elastic/indexes to /usr/share/elasticsearch
   mount:
@@ -28,11 +37,14 @@
     src: /dev/elastic/indexes
     fstype: xfs
     state: present
+  when: mount_state.stdout == ""
 
 - name: Mount from fstab
   command: mount -a
   args:
     warn: no
+  when: mount_state.stdout == ""
 
 - name: Move elasticsearch data back
   shell: mv /tmp/usr_share_elasticsearch/* /usr/share/elasticsearch
+  when: mount_state.stdout == ""
