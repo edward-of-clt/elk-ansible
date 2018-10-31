@@ -68,9 +68,9 @@ node.name: ${HOSTNAME}
 #    to act as a "search load balancer" (fetching data from nodes,
 #    aggregating results, etc.)
 #
-node.master: ${IS_MASTER}
+node.master: {% if job is defined and 'master' in job %}true{% else %}false{% endif %}
 
-node.data: ${IS_DATA}
+node.data: {% if job is defined and 'data' in job %}true{% else %}false{% endif %}
 
 # Use the Cluster Health API [http://localhost:9200/_cluster/health], the
 # Node Info API [http://localhost:9200/_cluster/nodes] or GUI tools
