@@ -1,7 +1,7 @@
 ---
 
 - name: Create AMI and Save it For Later
-  hosts: ami
+  hosts: data
   connection: local
   tasks:
 
@@ -31,23 +31,13 @@
       when: ami.changed
     
 - name: Install Resources
-  hosts: ami
+  hosts: data
   become: yes
   roles:
-    - disable_se_linux
     - install_packages
-    - role: elasticsearch
-      vars:
-        action: setup_lvm
-    - role: elasticsearch
-      vars:
-        action: configure
-        job: data
-    - role: elasticsearch
-      vars:
-        action: deploy
-  tasks:
+    - elasticsearch
 
+  tasks:
     - name: Create EC2 AMI for Data Nodes
       ec2_ami:
         region: "{{ aws.region.geo }}"
@@ -58,11 +48,12 @@
           Name: "{{ aws.ami.name }}-data-{{ ansible_date_time.epoch }}"
           Description: Elastic Data ES Template
           Job: data
+          Project: "{{ resource_prefix }}"
       become: no
       delegate_to: localhost
     
 - name: Take Snapshot of Image and then Terminate
-  hosts: ami
+  hosts: data
   connection: local
   tasks:    
 

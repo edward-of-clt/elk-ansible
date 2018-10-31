@@ -1,4 +1,5 @@
 ---
 
-- import_tasks: "./{{ action }}.yml"
-  when: action is defined
+- import_tasks: "./setup_lvm.yml"
+- import_tasks: "./configure.yml"
+- import_tasks: "./deploy.yml"

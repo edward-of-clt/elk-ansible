@@ -7,12 +7,12 @@ resource_name: elasticsearch
 
 aws: 
   ec2:
-    instance_size_series: t2
+    instance_size_series: m5
     key_name: CMF
     base: ami-0e6d2e8684d4ccb3e
     vpc_id: subnet-c601aee9
     masters:
-      instance_type: t2.large
+      instance_type: m5.large
       security_group: [ "rv-ssh", "{{ resource_prefix }}-{{ resource_name }}-group", "{{resource_prefix}}-{{ resource_name }}-master" ]
       volumes: 
         - device_name: /dev/xvdb
@@ -20,7 +20,7 @@ aws:
           volume_type: gp2
           delete_on_termination: yes
     data:
-      instance_type: t2.large
+      instance_type: r5.2xlarge
       security_group: [ "rv-ssh", "{{ resource_prefix }}-{{ resource_name }}-group" ]
   region:
     geo: us-east-1
@@ -36,6 +36,7 @@ aws:
         volume_size: 100
         iops: 1000
         volume_type: io1
+        delete_on_termination: yes
   vpc:
     zones: 
       rv-saas-main-private-0:
@@ -105,9 +106,9 @@ aws:
     #   load_balancers: "{{resource_prefix}}-{{ resource_name }}-master-elb"
     "{{ resource_prefix }}-{{ resource_name }}-data":
       size:
-        initial: 6
+        initial: 3
         max: 90
-        min: 6
+        min: 3
       term_policy: OldestInstance
       launch_config: "{{ resource_prefix }}-elastic-*"
       load_balancers: "{{resource_prefix}}-{{ resource_name }}-data-elb"
@@ -130,7 +131,7 @@ aws:
 elastic:
   discovery:
     zen:
-      minimum_master_nodes: 3
+      minimum_master_nodes: 2
   network:
     host: 0.0.0.0
   cluster:
@@ -138,7 +139,4 @@ elastic:
   index:
     number_of_replicas: 2
   
-java_heap:
-  max: 1024m
-  min: 1024m
 

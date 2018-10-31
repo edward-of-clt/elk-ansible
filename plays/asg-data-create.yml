@@ -33,4 +33,7 @@
         wait_for_instances: yes
         desired_capacity: "{{ item.value.size.initial }}"
         vpc_zone_identifier: "[ {% for item, vals in aws.vpc.zones |dictsort %}'{{ vals.id }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
+        tags:
+          - Name: "{{ resource_prefix }}-{{ resource_name }}-data"
+          - Project: "{{ resource_prefix }}"
       with_dict: "{{ aws.auto_scaling_groups }}"

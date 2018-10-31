@@ -29,6 +29,13 @@
     - logs
     - data
 
+- name: Write jvm.options Template
+  template:
+    src: ./templates/jvm.options
+    dest: /etc/elasticsearch/jvm.options
+  notify:
+    - restart_elastic
+
 - name: Write elastic.yml Template
   template:
     src: ./templates/elastic.yml
@@ -39,7 +46,7 @@
 - name: Write elasticsearch.service
   template:
     src: ./templates/elasticsearch.service
-    dest: /usr/lib/systemd/system/elasticsearch.service
+    dest: /etc/systemd/system/elasticsearch.service
     owner: root
     group: root
     mode: 0744
