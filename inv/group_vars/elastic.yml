@@ -1,6 +1,6 @@
 ---
 
-ansible_ssh_user: centos
+ansible_ssh_user: ec2-user
 
 resource_prefix: elk
 resource_name: elasticsearch
@@ -9,7 +9,7 @@ aws:
   ec2:
     instance_size_series: t2
     key_name: CMF
-    base: ami-9887c6e7
+    base: ami-0e6d2e8684d4ccb3e
     vpc_id: subnet-c601aee9
     masters:
       instance_type: t2.large
@@ -26,7 +26,7 @@ aws:
     geo: us-east-1
   ami:
     name: "{{ resource_prefix }}-{{ resource_name }}"
-    base: ami-9887c6e7
+    base: ami-0e6d2e8684d4ccb3e
     key_name: CMF
     instance_type: t2.medium
     security_group: [ 'rv-ssh', 'egress-all' ]
