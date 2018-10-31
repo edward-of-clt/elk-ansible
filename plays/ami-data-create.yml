@@ -38,9 +38,6 @@
     - install_packages
     - role: elasticsearch
       vars:
-        action: create_dirs
-    - role: elasticsearch
-      vars:
         action: setup_lvm
     - role: elasticsearch
       vars:

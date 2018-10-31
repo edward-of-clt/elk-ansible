@@ -1,4 +1,4 @@
 ---
 
 - yum:
-    name: ['system-storage-manager', 'sg3_utils', 'lvm*', 'java' ]
+    name: ['system-storage-manager', 'sg3_utils', 'lvm*', 'java', 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.4.2.rpm' ]

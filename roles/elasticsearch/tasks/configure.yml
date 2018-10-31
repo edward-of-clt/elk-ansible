@@ -4,19 +4,38 @@
 # sent / updated
 # - shell: rm -rf /etc/elasticsearch/*
 
-- name: Sync Standard Config Files
-  copy:
-    src: config/
-    dest: /etc/elasticsearch
-    
 - name: set vm.max_map_count to 262144 in sysctl
   sysctl: name={{ item.key }} value={{ item.value }}
   with_items:
     - { key: "vm.max_map_count", value: "262144" }
 
-- name: Write Template
+- name: Create /usr/share/elasticsearch/logs
+  file:
+    path: "/usr/share/elasticsearch/{{ item }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    recurse: yes
+  with_items:
+    - logs
+    - data
+
+- name: Write elastic.yml Template
   template:
     src: ./templates/elastic.yml
     dest: /etc/elasticsearch/elasticsearch.yml
   notify:
-        - restart_elastic
+    - restart_elastic
+
+- name: Write elasticsearch.service
+  template:
+    src: ./templates/elasticsearch.service
+    dest: /usr/lib/systemd/system/elasticsearch.service
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Write log4j2.properties
+  copy:
+    src: ./files/log4j2.properties
+    dest: /etc/elasticsearch/log4j2.properties

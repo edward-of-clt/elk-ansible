@@ -25,21 +25,12 @@
     - name: Create ASG
       ec2_asg:
         name: "{{ resource_prefix }}-{{ resource_name }}"
-        # load_balancers: [ 'lb1', 'lb2' ]
         availability_zones: "[ {% for item, vals in aws.vpc.zones| dictsort %}'{{ aws.region.geo }}{{ vals.zone }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
         launch_config_name: "{{ aws.launch_config.name }}"
+        replace_all_instances: yes
         min_size: "{{ item.value.size.min }}"
         max_size: "{{ item.value.size.max }}"
         wait_for_instances: yes
         desired_capacity: "{{ item.value.size.initial }}"
         vpc_zone_identifier: "[ {% for item, vals in aws.vpc.zones |dictsort %}'{{ vals.id }}'{% if not loop.last %}, {% endif %}{% endfor %} ]"
       with_dict: "{{ aws.auto_scaling_groups }}"
-
-- name: Restart ES Masters 
-  hosts: masters
-  become: yes
-  tasks:
-
-    - service:
-        name: elasticsearch
-        state: restarted

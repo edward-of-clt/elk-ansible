@@ -134,7 +134,7 @@ elastic:
   network:
     host: 0.0.0.0
   cluster:
-    name: cluster_name
+    name: eles-gen-muse1
   index:
     number_of_replicas: 2
   

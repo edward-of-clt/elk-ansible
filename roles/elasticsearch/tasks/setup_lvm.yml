@@ -17,6 +17,11 @@
     fstype: xfs
     dev: /dev/elastic/indexes
 
+- name: Copy out the old content
+  shell: |
+    mkdir /tmp/usr_share_elasticsearch
+    mv /usr/share/elasticsearch/* /tmp/usr_share_elasticsearch/
+
 - name: Mount /dev/elastic/indexes to /usr/share/elasticsearch
   mount:
     path: /usr/share/elasticsearch
@@ -28,3 +33,6 @@
   command: mount -a
   args:
     warn: no
+
+- name: Move elasticsearch data back
+  shell: mv /tmp/usr_share_elasticsearch/* /usr/share/elasticsearch

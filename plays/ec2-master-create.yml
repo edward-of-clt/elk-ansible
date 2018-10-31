@@ -39,9 +39,6 @@
     - install_packages
     - role: elasticsearch
       vars:
-        action: create_dirs
-    - role: elasticsearch
-      vars:
         action: setup_lvm
     - role: elasticsearch
       vars:
@@ -50,3 +47,9 @@
     - role: elasticsearch
       vars:
         action: deploy
+  tasks:
+
+    - name: Start ES
+      service:
+        name: elasticsearch
+        state: started
